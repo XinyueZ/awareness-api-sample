@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">"AwarenessAPISample "</string>
+    <string name="title_activity_maps">Awareness API usage</string>
+</resources>
