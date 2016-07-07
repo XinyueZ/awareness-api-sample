@@ -1,11 +1,35 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat">
+
+    <style name="AppThemeBase" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorWhite</item>
+        <item name="android:textColorTertiary">@color/colorBlack</item>
+
+        <!--Make window to be transparent absolutely.-->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <!--<item name="android:windowIsFloating">true</item>-->
+    </style>
+
+    <style name="AppTheme" parent="AppThemeBase">
+    </style>
+
+    <style name="FAB">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/fab_margin</item>
+        <item name="android:layout_marginRight">@dimen/fab_margin</item>
+        <item name="android:layout_marginStart">@dimen/fab_margin</item>
+        <item name="android:layout_marginEnd">@dimen/fab_margin</item>
+        <item name="android:layout_marginBottom">@dimen/fab_margin</item>
     </style>
 
 </resources>

@@ -1,8 +1,48 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:map="http://schemas.android.com/apk/res-auto"
-          xmlns:tools="http://schemas.android.com/tools"
-          android:id="@+id/map"
-          android:name="com.google.android.gms.maps.SupportMapFragment"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          tools:context="com.demo.awareness.app.activities.MapsActivity"/>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="com.demo.awareness.app.activities.MapsActivity">
+
+    <data class="MapActivityBinding"></data>
+
+    <FrameLayout
+        android:id="@+id/map_container_fl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:orientation="vertical">
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/my_location__fab"
+                style="@style/FAB"
+                android:onClick="askMyLocation"
+                map:backgroundTint="@color/colorOrange"
+                map:elevation="4dp"
+                map:fabSize="mini"
+                map:rippleColor="@color/colorOrangeDark"
+                map:srcCompat="@drawable/ic_my_location"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/weather_fab"
+                style="@style/FAB"
+                android:onClick="askWeather"
+                map:backgroundTint="@color/colorGreen"
+                map:elevation="4dp"
+                map:fabSize="mini"
+                map:rippleColor="@color/colorGreenDark"
+                map:srcCompat="@drawable/ic_weather_req"/>
+        </LinearLayout>
+    </FrameLayout>
+</layout>
