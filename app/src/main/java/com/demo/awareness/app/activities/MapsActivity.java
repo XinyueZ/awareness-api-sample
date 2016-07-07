@@ -16,6 +16,7 @@ import android.view.View;
 import com.demo.awareness.R;
 import com.demo.awareness.app.App;
 import com.demo.awareness.databinding.MapActivityBinding;
+import com.demo.awareness.utils.Utils;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.LocationResult;
 import com.google.android.gms.awareness.snapshot.PlacesResult;
@@ -200,6 +201,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 	@NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 	void doAskPlaces() {
+		mGoogleMap.clear();
 		Awareness.SnapshotApi.getPlaces(mGoogleApiClient)
 		                     .setResultCallback(new ResultCallback<PlacesResult>() {
 			                     @Override
@@ -229,7 +231,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 					                 //Error when getting photo of place, populate a default icon.
 					                 mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
-					                                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_default_thumbnail))
+					                                                         .icon(Utils.getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
 					                                                         .anchor(0f, 0f));
 					                 return;
 				                 }
@@ -246,7 +248,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 								                                    //Error when getting photo of place, populate a default icon.
 								                                    mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
-								                                                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_default_thumbnail))
+								                                                                            .icon(Utils.getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
 								                                                                            .anchor(0f, 0f));
 								                                    return;
 							                                    }
