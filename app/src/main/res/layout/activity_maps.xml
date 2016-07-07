@@ -24,7 +24,17 @@
             android:orientation="vertical">
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/my_location__fab"
+                style="@style/FAB"
+                android:onClick="askPlaces"
+                map:backgroundTint="@color/colorBrown"
+                map:elevation="4dp"
+                map:fabSize="mini"
+                map:rippleColor="@color/colorBrownDark"
+                map:srcCompat="@drawable/ic_places"
+                />
+
+
+            <android.support.design.widget.FloatingActionButton
                 style="@style/FAB"
                 android:onClick="askMyLocation"
                 map:backgroundTint="@color/colorOrange"
@@ -35,7 +45,6 @@
                 />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/weather_fab"
                 style="@style/FAB"
                 android:onClick="askWeather"
                 map:backgroundTint="@color/colorGreen"

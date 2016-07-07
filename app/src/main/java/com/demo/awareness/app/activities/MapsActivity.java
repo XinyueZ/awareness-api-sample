@@ -3,13 +3,14 @@ package com.demo.awareness.app.activities;
 import android.Manifest;
 import android.content.IntentSender;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.support.v4.util.ArrayMap;
 import android.view.View;
 
 import com.demo.awareness.R;
@@ -17,34 +18,43 @@ import com.demo.awareness.app.App;
 import com.demo.awareness.databinding.MapActivityBinding;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.snapshot.LocationResult;
+import com.google.android.gms.awareness.snapshot.PlacesResult;
 import com.google.android.gms.awareness.snapshot.WeatherResult;
 import com.google.android.gms.awareness.state.Weather;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResult;
+import com.google.android.gms.location.places.PlacePhotoResult;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 
 import static com.demo.awareness.R.id.map;
-import static com.google.android.gms.analytics.internal.zzy.m;
 
 @RuntimePermissions
 public final class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 	private static final int LAYOUT = R.layout.activity_maps;
 	private static final int REQUEST_CODE_RESOLVE_ERR = 0x98;
+	private static final String TAG = MapsActivity.class.getName();
 	private MapActivityBinding mBinding;
 	private GoogleApiClient mGoogleApiClient;
 	private GoogleMap mGoogleMap;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,15 +64,6 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	}
 
 
-	/**
-	 * Manipulates the map once available.
-	 * This callback is triggered when the map is ready to be used.
-	 * This is where we can add markers or lines, add listeners or move the camera. In this case,
-	 * we just add a marker near Sydney, Australia.
-	 * If Google Play services is not installed on the device, the user will be prompted to install
-	 * it inside the SupportMapFragment. This method will only be triggered once the user has
-	 * installed Google Play services and returned to the app.
-	 */
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
 		// Add a marker in Sydney and move the camera
@@ -107,6 +108,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 				}
 			}
 		}).addApi(Awareness.API)
+		  .addApi(Places.GEO_DATA_API)
 		  .build();
 		mGoogleApiClient.connect();
 	}
@@ -115,7 +117,6 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		// NOTE: delegate the permission handling to generated method
 		MapsActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
 	}
 
@@ -191,5 +192,74 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 				                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), mGoogleMap.getMaxZoomLevel()));
 			                     }
 		                     });
+	}
+
+	public void askPlaces(@SuppressWarnings("UnusedParameters") View view) {
+		MapsActivityPermissionsDispatcher.doAskPlacesWithCheck(this);
+	}
+
+	@NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+	void doAskPlaces() {
+		Awareness.SnapshotApi.getPlaces(mGoogleApiClient)
+		                     .setResultCallback(new ResultCallback<PlacesResult>() {
+			                     @Override
+			                     public void onResult(@NonNull PlacesResult placesResult) {
+				                     if (!placesResult.getStatus()
+				                                      .isSuccess()) {
+					                     Snackbar.make(mBinding.mapContainerFl, R.string.err_places, Snackbar.LENGTH_SHORT)
+					                             .show();
+					                     return;
+				                     }
+
+				                     List<PlaceLikelihood> placeLikelihoodList = placesResult.getPlaceLikelihoods();
+				                     for (PlaceLikelihood placeLikelihood : placeLikelihoodList) {
+					                     askPlacesPhotos(placeLikelihood.getPlace());
+				                     }
+			                     }
+		                     });
+	}
+
+	private void askPlacesPhotos(@NonNull final Place place) {
+		Places.GeoDataApi.getPlacePhotos(mGoogleApiClient, place.getId())
+		                 .setResultCallback(new ResultCallback<PlacePhotoMetadataResult>() {
+			                 @Override
+			                 public void onResult(PlacePhotoMetadataResult photos) {
+				                 if (!photos.getStatus()
+				                            .isSuccess()) {
+
+					                 //Error when getting photo of place, populate a default icon.
+					                 mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
+					                                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_default_thumbnail))
+					                                                         .anchor(0f, 0f));
+					                 return;
+				                 }
+				                 PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+				                 if (photoMetadataBuffer.getCount() > 0) {
+					                 int thumbSize = getResources().getDimensionPixelOffset(R.dimen.place_photo_thumbnail);
+					                 photoMetadataBuffer.get(0)
+					                                    .getScaledPhoto(mGoogleApiClient, thumbSize, thumbSize)
+					                                    .setResultCallback(new ResultCallback<PlacePhotoResult>() {
+						                                    @Override
+						                                    public void onResult(PlacePhotoResult placePhotoResult) {
+							                                    if (!placePhotoResult.getStatus()
+							                                                         .isSuccess()) {
+
+								                                    //Error when getting photo of place, populate a default icon.
+								                                    mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
+								                                                                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_default_thumbnail))
+								                                                                            .anchor(0f, 0f));
+								                                    return;
+							                                    }
+
+							                                    //Populate photo of place.
+							                                    mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
+							                                                                            .icon(BitmapDescriptorFactory.fromBitmap(placePhotoResult.getBitmap()))
+							                                                                            .anchor(0f, 0f));
+						                                    }
+					                                    });
+				                 }
+				                 photoMetadataBuffer.release();
+			                 }
+		                 });
 	}
 }

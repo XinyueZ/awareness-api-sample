@@ -14,4 +14,10 @@
 
     <color name="colorOrange">#FF9800</color>
     <color name="colorOrangeDark">#FF6D00</color>
+
+
+
+    <color name="colorBrown">#795548</color>
+    <color name="colorBrownDark">#3E2723</color>
+
 </resources>

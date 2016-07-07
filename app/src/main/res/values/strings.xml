@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">"AwarenessAPISample "</string>
     <string name="title_activity_maps">Awareness API usage</string>
-    <string name="err_play_cnn">Connect to Google Play-services can not be successed.</string>
+    <string name="err_play_cnn">Connect to Google Play-services can not be success.</string>
     <string name="close_app">App close</string>
     <string name="ok">Ok</string>
     <string name="err_weather_data">Can not get weather data.</string>
     <string name="err_no_fine_location_permission">You must have ACCESS_FINE_LOCATION to get some features.</string>
     <string name="ready_play_service">Connected to play-service successfully.</string>
     <string name="err_my_location">Can not get your current location.</string>
+    <string name="err_places">Could not get places.</string>
 </resources>
