@@ -9,4 +9,5 @@
     <string name="ready_play_service">Connected to play-service successfully.</string>
     <string name="err_my_location">Can not get your current location.</string>
     <string name="err_places">Could not get places.</string>
+    <string name="err_headset">Could not get headphone state.</string>
 </resources>

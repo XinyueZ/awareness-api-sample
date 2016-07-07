@@ -1,16 +1,21 @@
 package com.demo.awareness.app.activities;
 
 import android.Manifest;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.databinding.DataBindingUtil;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.util.ArrayMap;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.demo.awareness.R;
@@ -18,13 +23,21 @@ import com.demo.awareness.app.App;
 import com.demo.awareness.databinding.MapActivityBinding;
 import com.demo.awareness.utils.Utils;
 import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.fence.AwarenessFence;
+import com.google.android.gms.awareness.fence.FenceState;
+import com.google.android.gms.awareness.fence.FenceUpdateRequest;
+import com.google.android.gms.awareness.fence.HeadphoneFence;
+import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
 import com.google.android.gms.awareness.snapshot.LocationResult;
 import com.google.android.gms.awareness.snapshot.PlacesResult;
 import com.google.android.gms.awareness.snapshot.WeatherResult;
+import com.google.android.gms.awareness.state.HeadphoneState;
 import com.google.android.gms.awareness.state.Weather;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
@@ -50,9 +63,10 @@ import static com.demo.awareness.R.id.map;
 
 @RuntimePermissions
 public final class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+	private static final String TAG = MapsActivity.class.getName();
 	private static final int LAYOUT = R.layout.activity_maps;
 	private static final int REQUEST_CODE_RESOLVE_ERR = 0x98;
-	private static final String TAG = MapsActivity.class.getName();
+	private static final String ACTION_FENCE_HEADSET_PLUGGED_IN = "action_fence_headset_plugged_in";
 	private MapActivityBinding mBinding;
 	private GoogleApiClient mGoogleApiClient;
 	private GoogleMap mGoogleMap;
@@ -64,6 +78,18 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 		obtainMap();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		registerHeadsetFence();
+		registerReceiver(mHeadsetStatusHandler, new IntentFilter(ACTION_FENCE_HEADSET_PLUGGED_IN));
+	}
+
+	@Override
+	protected void onPause() {
+		unregisterHeadsetFence(ACTION_FENCE_HEADSET_PLUGGED_IN);
+		super.onPause();
+	}
 
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
@@ -263,5 +289,83 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 				                 photoMetadataBuffer.release();
 			                 }
 		                 });
+	}
+
+
+	private void registerHeadsetFence() {
+		//Snapshot detecting: Fellowing codes are not important, because the fence-api can detect current status as well.
+
+//		Awareness.SnapshotApi.getHeadphoneState(mGoogleApiClient)
+//		                     .setResultCallback(new ResultCallback<HeadphoneStateResult>() {
+//			                     @Override
+//			                     public void onResult(@NonNull HeadphoneStateResult headphoneStateResult) {
+//				                     if (!headphoneStateResult.getStatus()
+//				                                              .isSuccess()) {
+//					                     Snackbar.make(mBinding.mapContainerFl, R.string.err_headset, Snackbar.LENGTH_SHORT)
+//					                             .show();
+//					                     return;
+//				                     }
+//				                     HeadphoneState headphoneState = headphoneStateResult.getHeadphoneState();
+//				                     mBinding.headsetStatusFab.setImageResource(headphoneState.getState() == HeadphoneState.PLUGGED_IN ?
+//				                                                                R.drawable.ic_headset_on :
+//				                                                                R.drawable.ic_headset_off);
+//			                     }
+//		                     });
+
+		// Fence detecting
+		// Create a fence.
+		AwarenessFence headphoneFence = HeadphoneFence.during(HeadphoneState.PLUGGED_IN);
+		PendingIntent headsetIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), new Intent(ACTION_FENCE_HEADSET_PLUGGED_IN), PendingIntent.FLAG_UPDATE_CURRENT);
+		Awareness.FenceApi.updateFences(mGoogleApiClient,
+		                                new FenceUpdateRequest.Builder().addFence(ACTION_FENCE_HEADSET_PLUGGED_IN, headphoneFence, headsetIntent)
+		                                                                .build())
+		                  .setResultCallback(new ResultCallback<Status>() {
+			                  @Override
+			                  public void onResult(@NonNull Status status) {
+				                  if (!status.isSuccess()) {
+					                  Snackbar.make(mBinding.mapContainerFl, R.string.err_headset, Snackbar.LENGTH_SHORT)
+					                          .show();
+				                  }
+			                  }
+		                  });
+	}
+
+
+	private BroadcastReceiver mHeadsetStatusHandler = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			FenceState fenceState = FenceState.extract(intent);
+
+			if (TextUtils.equals(fenceState.getFenceKey(), ACTION_FENCE_HEADSET_PLUGGED_IN)) {
+				boolean pluggedIn = false;
+				switch (fenceState.getCurrentState()) {
+					case FenceState.TRUE:
+						pluggedIn = true;
+						break;
+				}
+
+				mBinding.headsetStatusFab.setImageResource(pluggedIn ?
+				                                           R.drawable.ic_headset_on :
+				                                           R.drawable.ic_headset_off);
+			}
+		}
+	};
+
+	private void unregisterHeadsetFence(final String fenceKey) {
+		unregisterReceiver(mHeadsetStatusHandler);
+		Awareness.FenceApi.updateFences(mGoogleApiClient,
+		                                new FenceUpdateRequest.Builder().removeFence(fenceKey)
+		                                                                .build())
+		                  .setResultCallback(new ResultCallbacks<Status>() {
+			                  @Override
+			                  public void onSuccess(@NonNull Status status) {
+				                  Log.i(TAG, "Fence " + fenceKey + " successfully removed.");
+			                  }
+
+			                  @Override
+			                  public void onFailure(@NonNull Status status) {
+				                  Log.i(TAG, "Fence " + fenceKey + " could NOT be removed.");
+			                  }
+		                  });
 	}
 }
