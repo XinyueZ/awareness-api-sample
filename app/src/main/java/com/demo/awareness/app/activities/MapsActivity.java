@@ -27,7 +27,6 @@ import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.HeadphoneFence;
-import com.google.android.gms.awareness.snapshot.HeadphoneStateResult;
 import com.google.android.gms.awareness.snapshot.LocationResult;
 import com.google.android.gms.awareness.snapshot.PlacesResult;
 import com.google.android.gms.awareness.snapshot.WeatherResult;
