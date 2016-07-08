@@ -8,7 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 
+import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
@@ -37,5 +39,17 @@ public final class Utils {
 		} else {
 			throw new IllegalArgumentException("Unsupported drawable type");
 		}
+	}
+
+
+
+	public static Drawable setTint(Drawable drawable, int color) {
+		final Drawable newDrawable = DrawableCompat.wrap(drawable);
+		DrawableCompat.setTint(newDrawable, color);
+		return newDrawable;
+	}
+
+	public static boolean fenceStateToBoolean(FenceState state) {
+		return state.getCurrentState() == FenceState.TRUE;
 	}
 }

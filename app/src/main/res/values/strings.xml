@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">"AwarenessAPISample "</string>
+    <string name="app_name">Awareness API Sample</string>
     <string name="title_activity_maps">Awareness API usage</string>
     <string name="err_play_cnn">Connect to Google Play-services can not be success.</string>
     <string name="close_app">App close</string>
@@ -10,4 +10,5 @@
     <string name="err_my_location">Can not get your current location.</string>
     <string name="err_places">Could not get places.</string>
     <string name="err_headset">Could not get headphone state.</string>
+    <string name="err_activity">Could not get activity state.</string>
 </resources>

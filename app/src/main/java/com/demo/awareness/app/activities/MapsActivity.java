@@ -14,6 +14,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +26,7 @@ import com.demo.awareness.databinding.MapActivityBinding;
 import com.demo.awareness.utils.Utils;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
+import com.google.android.gms.awareness.fence.DetectedActivityFence;
 import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.awareness.fence.FenceUpdateRequest;
 import com.google.android.gms.awareness.fence.HeadphoneFence;
@@ -59,6 +62,8 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 
 import static com.demo.awareness.R.id.map;
+import static com.demo.awareness.utils.Utils.fenceStateToBoolean;
+import static com.google.android.gms.analytics.internal.zzy.v;
 
 @RuntimePermissions
 public final class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -66,6 +71,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	private static final int LAYOUT = R.layout.activity_maps;
 	private static final int REQUEST_CODE_RESOLVE_ERR = 0x98;
 	private static final String ACTION_FENCE_HEADSET_PLUGGED_IN = "action_fence_headset_plugged_in";
+	private static final String ACTION_FENCE_ACTIVITY = "action_fence_activity";
 	private MapActivityBinding mBinding;
 	private GoogleApiClient mGoogleApiClient;
 	private GoogleMap mGoogleMap;
@@ -81,12 +87,13 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	protected void onResume() {
 		super.onResume();
 		registerHeadsetFence();
-		registerReceiver(mHeadsetStatusHandler, new IntentFilter(ACTION_FENCE_HEADSET_PLUGGED_IN));
+		registerActivityFence();
 	}
 
 	@Override
 	protected void onPause() {
 		unregisterHeadsetFence(ACTION_FENCE_HEADSET_PLUGGED_IN);
+		unregisterActivityFence(ACTION_FENCE_ACTIVITY);
 		super.onPause();
 	}
 
@@ -215,7 +222,8 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 					                     return;
 				                     }
 				                     Location location = locationResult.getLocation();
-				                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), mGoogleMap.getMaxZoomLevel()));
+				                     int zoom = 17;//mGoogleMap.getMaxZoomLevel()
+				                     mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), zoom));
 			                     }
 		                     });
 	}
@@ -327,6 +335,8 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 				                  }
 			                  }
 		                  });
+
+		registerReceiver(mHeadsetStatusHandler, new IntentFilter(ACTION_FENCE_HEADSET_PLUGGED_IN));
 	}
 
 
@@ -336,14 +346,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 			FenceState fenceState = FenceState.extract(intent);
 
 			if (TextUtils.equals(fenceState.getFenceKey(), ACTION_FENCE_HEADSET_PLUGGED_IN)) {
-				boolean pluggedIn = false;
-				switch (fenceState.getCurrentState()) {
-					case FenceState.TRUE:
-						pluggedIn = true;
-						break;
-				}
-
-				mBinding.headsetStatusFab.setImageResource(pluggedIn ?
+				mBinding.headsetStatusFab.setImageResource(fenceStateToBoolean(fenceState) ?
 				                                           R.drawable.ic_headset_on :
 				                                           R.drawable.ic_headset_off);
 			}
@@ -366,5 +369,122 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 				                  Log.i(TAG, "Fence " + fenceKey + " could NOT be removed.");
 			                  }
 		                  });
+	}
+
+
+	private void registerActivityFence() {
+		PendingIntent activityIntent = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), new Intent(ACTION_FENCE_ACTIVITY), PendingIntent.FLAG_UPDATE_CURRENT);
+		Awareness.FenceApi.updateFences(mGoogleApiClient,
+		                                new FenceUpdateRequest.Builder().addFence("UNKNOWN", DetectedActivityFence.during(DetectedActivityFence.UNKNOWN), activityIntent)
+		                                                                .addFence("ON_FOOT", DetectedActivityFence.during(DetectedActivityFence.ON_FOOT), activityIntent)
+		                                                                .addFence("RUNNING", DetectedActivityFence.during(DetectedActivityFence.RUNNING), activityIntent)
+		                                                                .addFence("WALKING", DetectedActivityFence.during(DetectedActivityFence.WALKING), activityIntent)
+		                                                                .addFence("STILL", DetectedActivityFence.during(DetectedActivityFence.STILL), activityIntent)
+		                                                                .addFence("ON_BICYCLE", DetectedActivityFence.during(DetectedActivityFence.ON_BICYCLE), activityIntent)
+		                                                                .addFence("IN_VEHICLE", DetectedActivityFence.during(DetectedActivityFence.IN_VEHICLE), activityIntent)
+		                                                                .addFence("TILTING", DetectedActivityFence.during(DetectedActivityFence.TILTING), activityIntent)
+		                                                                .build())
+		                  .setResultCallback(new ResultCallback<Status>() {
+			                  @Override
+			                  public void onResult(@NonNull Status status) {
+				                  if (!status.isSuccess()) {
+					                  Snackbar.make(mBinding.mapContainerFl, R.string.err_activity, Snackbar.LENGTH_SHORT)
+					                          .show();
+				                  }
+			                  }
+		                  });
+		registerReceiver(mActivityStatusHandler, new IntentFilter(ACTION_FENCE_ACTIVITY));
+	}
+
+
+	private BroadcastReceiver mActivityStatusHandler = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			FenceState fenceState = FenceState.extract(intent);
+			Log.d(TAG, "Fence activity" + fenceState.getFenceKey() + " - - cur: " + fenceState.getCurrentState() + ", previous: " + fenceState.getPreviousState());
+			switch (fenceState.getFenceKey()) {
+				case "UNKNOWN":
+					mBinding.unknownFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_unknown),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "ON_FOOT":
+					mBinding.onFootFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_foot),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "RUNNING":
+					mBinding.onRunningFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_running),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "WALKING":
+					mBinding.onWalkingFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_walking),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "STILL":
+					mBinding.onStillFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_still),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "ON_BICYCLE":
+					mBinding.onBicycleFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_bicycle),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "IN_VEHICLE":
+					mBinding.inVehicleFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_in_vehicle),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+				case "TILTING":
+					mBinding.tiltingFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_tilting),
+					              fenceStateToBoolean(fenceState) ?
+					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					break;
+			}
+		}
+	};
+
+	private void unregisterActivityFence(final String fenceKey) {
+		unregisterReceiver(mActivityStatusHandler);
+		Awareness.FenceApi.updateFences(mGoogleApiClient,
+		                                new FenceUpdateRequest.Builder().removeFence(fenceKey)
+		                                                                .build())
+		                  .setResultCallback(new ResultCallbacks<Status>() {
+			                  @Override
+			                  public void onSuccess(@NonNull Status status) {
+				                  Log.i(TAG, "Fence " + fenceKey + " successfully removed.");
+			                  }
+
+			                  @Override
+			                  public void onFailure(@NonNull Status status) {
+				                  Log.i(TAG, "Fence " + fenceKey + " could NOT be removed.");
+			                  }
+		                  });
+	}
+
+
+	private void registerLocationFence() {
+		MapsActivityPermissionsDispatcher.doRegisterLocationFenceWithCheck(this);
+	}
+
+	@NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+	void doRegisterLocationFence() {
+
+	}
+
+	private void unregisterLocationFence(final String fenceKey) {
+
+
 	}
 }
