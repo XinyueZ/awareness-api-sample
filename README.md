@@ -8,7 +8,7 @@ Sample for using [Awareness API](https://developers.google.com/awareness/)
 3. Places around my current location
 4. Detect plugged-In status of headset
 5. Detect current activity(running, walking, biking, driving, etc)
-6. Tap a "location" on map and use any mock app to mock a Geofencing(location fencing).
+6. Tap a "location" on map and use any mock app to mock a Geofencing(location fencing). Use [this app](https://play.google.com/store/apps/details?id=com.lexa.fakegps) to mock your current location.
 
 # License
 
