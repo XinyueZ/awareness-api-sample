@@ -20,6 +20,7 @@
     <color name="colorBrown">#795548</color>
     <color name="colorBrownDark">#3E2723</color>
 
-
+    <color name="colorLime">#CDDC39</color>
+    <color name="colorLimeDark">#AEEA00</color>
 
 </resources>

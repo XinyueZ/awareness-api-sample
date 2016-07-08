@@ -51,17 +51,71 @@
                 map:srcCompat="@drawable/ic_weather_req"/>
         </LinearLayout>
 
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/headset_status_fab"
-            style="@style/FAB"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:clickable="false"
-            android:onClick="askWeather"
-            map:backgroundTint="@color/colorWhite"
-            map:elevation="0dp"
-            map:fabSize="mini"
-            map:rippleColor="@color/colorWhite"
-            map:srcCompat="@drawable/ic_headset_off"/>
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/on_foot_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_on_foot"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/on_walking_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_walking"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/on_running_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_running"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/on_bicycle_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_on_bicycle"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/in_vehicle_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_in_vehicle"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/on_still_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_still"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/tilting_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_tilting"/>
+
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/unknown_fab"
+                    style="@style/ICON"
+                    map:srcCompat="@drawable/ic_unknown"/>
+            </LinearLayout>
+
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/headset_status_fab"
+                style="@style/ICON"
+                map:srcCompat="@drawable/ic_headset_off"/>
+        </LinearLayout>
     </FrameLayout>
 </layout>
