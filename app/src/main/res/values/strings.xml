@@ -11,4 +11,6 @@
     <string name="err_places">Could not get places.</string>
     <string name="err_headset">Could not get headphone state.</string>
     <string name="err_activity">Could not get activity state.</string>
+    <string name="msg_pin_for_geofence">Keep going to pin a location on map by Long-Tap and try to move your body near to this location to get fence. Click [cancel] to reverse all and no pin no fence.</string>
+    <string name="cancel">Cancel</string>
 </resources>

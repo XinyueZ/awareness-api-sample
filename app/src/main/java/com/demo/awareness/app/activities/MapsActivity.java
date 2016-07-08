@@ -22,8 +22,8 @@ import android.view.View;
 
 import com.demo.awareness.R;
 import com.demo.awareness.app.App;
+import com.demo.awareness.app.fragments.TipForPinDialogFragment;
 import com.demo.awareness.databinding.MapActivityBinding;
-import com.demo.awareness.utils.Utils;
 import com.google.android.gms.awareness.Awareness;
 import com.google.android.gms.awareness.fence.AwarenessFence;
 import com.google.android.gms.awareness.fence.DetectedActivityFence;
@@ -62,12 +62,13 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 
 import static com.demo.awareness.R.id.map;
-import static com.demo.awareness.utils.Utils.*;
 import static com.demo.awareness.utils.Utils.fenceStateToBoolean;
-import static com.google.android.gms.analytics.internal.zzy.v;
+import static com.demo.awareness.utils.Utils.getBitmapDescriptor;
+import static com.demo.awareness.utils.Utils.setTint;
 
 @RuntimePermissions
-public final class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public final class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+                                                                    TipForPinDialogFragment.OnPinGeofenceListener {
 	private static final String TAG = MapsActivity.class.getName();
 	private static final int LAYOUT = R.layout.activity_maps;
 	private static final int REQUEST_CODE_RESOLVE_ERR = 0x98;
@@ -403,54 +404,33 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 		public void onReceive(Context context, Intent intent) {
 			FenceState fenceState = FenceState.extract(intent);
 			Log.d(TAG, "Fence activity" + fenceState.getFenceKey() + " - - cur: " + fenceState.getCurrentState() + ", previous: " + fenceState.getPreviousState());
+			int tintColor = fenceStateToBoolean(fenceState) ?
+			                ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
+			                ResourcesCompat.getColor(getResources(), R.color.colorGrey, null);
 			switch (fenceState.getFenceKey()) {
 				case "UNKNOWN":
-					mBinding.unknownFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_unknown),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.unknownFab.getDrawable(), tintColor);
 					break;
 				case "ON_FOOT":
-					mBinding.onFootFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_foot),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.onFootFab.getDrawable(), tintColor);
 					break;
 				case "RUNNING":
-					mBinding.onRunningFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_running),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.onRunningFab.getDrawable(), tintColor);
 					break;
 				case "WALKING":
-					mBinding.onWalkingFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_walking),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.onWalkingFab.getDrawable(), tintColor);
 					break;
 				case "STILL":
-					mBinding.onStillFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_still),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.onStillFab.getDrawable(), tintColor);
 					break;
 				case "ON_BICYCLE":
-					mBinding.onBicycleFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_bicycle),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.onBicycleFab.getDrawable(), tintColor);
 					break;
 				case "IN_VEHICLE":
-					mBinding.inVehicleFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_in_vehicle),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.inVehicleFab.getDrawable(), tintColor);
 					break;
 				case "TILTING":
-					mBinding.tiltingFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_tilting),
-					              fenceStateToBoolean(fenceState) ?
-					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
-					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
+					setTint(mBinding.tiltingFab.getDrawable(), tintColor);
 					break;
 			}
 		}
@@ -487,5 +467,30 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	private void unregisterLocationFence(final String fenceKey) {
 
 
+	}
+
+	public void pinGeofence(View view) {
+		if (mBinding.getFlag()) {
+			TipForPinDialogFragment.newInstance()
+			                       .show(getSupportFragmentManager(), null);
+		} else {
+			mBinding.setFlag(true);
+		}
+	}
+
+
+	@Override
+	public void onOk() {
+
+	}
+
+	@Override
+	public void onCancel() {
+		clearAllGeofenceInfo();
+	}
+
+
+	private void clearAllGeofenceInfo() {
+		mBinding.setFlag(false);
 	}
 }

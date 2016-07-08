@@ -3,7 +3,16 @@
         xmlns:tools="http://schemas.android.com/tools"
         tools:context="com.demo.awareness.app.activities.MapsActivity">
 
-    <data class="MapActivityBinding"></data>
+    <data class="MapActivityBinding">
+
+        <variable
+            name="flag"
+            type="boolean"/>
+
+        <import
+            alias="V"
+            type="android.view.View"/>
+    </data>
 
     <FrameLayout
         android:id="@+id/map_container_fl"
@@ -22,6 +31,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
             android:orientation="vertical">
+
+            <android.support.design.widget.FloatingActionButton
+                style="@style/FAB"
+                android:onClick="pinGeofence"
+                map:backgroundTint="@color/colorPrimary"
+                map:fabSize="mini"
+                map:pinFlag="@{flag}"
+                map:rippleColor="@color/colorPrimaryDark"/>
 
             <android.support.design.widget.FloatingActionButton
                 style="@style/FAB"
@@ -52,15 +69,15 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
             android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
@@ -89,6 +106,13 @@
                     map:srcCompat="@drawable/ic_on_bicycle"/>
 
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/in_vehicle_fab"
                     style="@style/ICON"
@@ -113,11 +137,21 @@
                     map:srcCompat="@drawable/ic_unknown"/>
             </LinearLayout>
 
-
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/headset_status_fab"
                 style="@style/ICON"
                 map:srcCompat="@drawable/ic_headset_off"/>
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/finger_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:longClickable="true"
+            android:visibility="@{flag ? V.VISIBLE : V.GONE}"
+            map:srcCompat="@drawable/ic_long_tap"
+            tools:ignore="contentDescription"/>
     </FrameLayout>
 </layout>
