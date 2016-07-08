@@ -7,6 +7,9 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.hardware.display.DisplayManagerCompat;
+import android.util.DisplayMetrics;
+import android.view.Display;
 
 import com.google.android.gms.awareness.fence.FenceState;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -19,7 +22,7 @@ public final class Utils {
 	}
 
 
-	private static Bitmap getBitmap(VectorDrawableCompat vectorDrawable) {
+	public static Bitmap getBitmap(VectorDrawableCompat vectorDrawable) {
 		Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -36,5 +39,32 @@ public final class Utils {
 
 	public static boolean fenceStateToBoolean(FenceState state) {
 		return state.getCurrentState() == FenceState.TRUE;
+	}
+
+
+	public static ScreenSize getScreenSize(Context cxt) {
+		return getScreenSize(cxt, 0);
+	}
+
+
+	public static ScreenSize getScreenSize(Context cxt, int displayIndex) {
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		Display[] displays = DisplayManagerCompat.getInstance(cxt).getDisplays();
+		Display display = displays[displayIndex];
+		display.getMetrics(displaymetrics);
+		return new ScreenSize(displaymetrics.widthPixels, displaymetrics.heightPixels);
+	}
+
+	/**
+	 * Screen-size in pixels.
+	 */
+	public static class ScreenSize {
+		public int Width;
+		public int Height;
+
+		public ScreenSize(int _width, int _height) {
+			Width = _width;
+			Height = _height;
+		}
 	}
 }

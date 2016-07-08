@@ -14,7 +14,7 @@
             type="android.view.View"/>
     </data>
 
-    <FrameLayout
+    <android.support.design.widget.CoordinatorLayout
         android:id="@+id/map_container_fl"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -143,7 +143,7 @@
                 map:srcCompat="@drawable/ic_headset_off"/>
         </LinearLayout>
 
-        <ImageView
+        <ImageButton
             android:id="@+id/finger_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -153,5 +153,5 @@
             android:visibility="@{flag ? V.VISIBLE : V.GONE}"
             map:srcCompat="@drawable/ic_long_tap"
             tools:ignore="contentDescription"/>
-    </FrameLayout>
+    </android.support.design.widget.CoordinatorLayout>
 </layout>

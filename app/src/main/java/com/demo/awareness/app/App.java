@@ -31,6 +31,7 @@
 package com.demo.awareness.app;
 
 import android.support.multidex.MultiDexApplication;
+import android.support.v7.app.AppCompatDelegate;
 
 
 public final class App extends MultiDexApplication {
@@ -41,6 +42,9 @@ public final class App extends MultiDexApplication {
 		Instance = this;
 	}
 
+	static {
+		AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+	}
 
 	@Override
 	public void onCreate() {

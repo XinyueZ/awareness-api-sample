@@ -12,5 +12,9 @@
     <string name="err_headset">Could not get headphone state.</string>
     <string name="err_activity">Could not get activity state.</string>
     <string name="msg_pin_for_geofence">Keep going to pin a location on map by Long-Tap and try to move your body near to this location to get fence. Click [cancel] to reverse all and no pin no fence.</string>
+    <string name="msg_lost_fence">Close now and last fence will be lost. </string>
+    <string name="msg_keep_fence">Click device [Home] to let this app background run and you can get fence.</string>
+
+    <string name="notify_you_got_fence">You got fence: %s .</string>
     <string name="cancel">Cancel</string>
 </resources>

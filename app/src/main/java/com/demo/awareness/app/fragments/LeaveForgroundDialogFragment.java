@@ -14,19 +14,19 @@ import com.demo.awareness.R;
 import com.demo.awareness.app.App;
 
 
-public final class TipForPinDialogFragment extends AppCompatDialogFragment {
+public final class LeaveForgroundDialogFragment extends AppCompatDialogFragment {
 
 	public static DialogFragment newInstance() {
-		return (DialogFragment) DialogFragment.instantiate(App.Instance, TipForPinDialogFragment.class.getName());
+		return (DialogFragment) DialogFragment.instantiate(App.Instance, LeaveForgroundDialogFragment.class.getName());
 	}
 
-	public interface OnPinGeofenceListener {
-		void onOk();
+	public interface LeaveForgroundListener {
+		void onGoOn();
 
-		void onCancel();
+		void onStay();
 	}
 
-	private OnPinGeofenceListener mOnListener;
+	private LeaveForgroundListener mOnListener;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,8 +36,8 @@ public final class TipForPinDialogFragment extends AppCompatDialogFragment {
 
 	@Override
 	public void onAttach(Context context) {
-		if (context instanceof OnPinGeofenceListener) {
-			mOnListener = (OnPinGeofenceListener) context;
+		if (context instanceof LeaveForgroundListener) {
+			mOnListener = (LeaveForgroundListener) context;
 		}
 		super.onAttach(context);
 	}
@@ -46,11 +46,11 @@ public final class TipForPinDialogFragment extends AppCompatDialogFragment {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage(R.string.msg_pin_for_geofence)
+		builder.setMessage(getString(R.string.msg_lost_fence) + "\n" + getString(R.string.msg_keep_fence))
 		       .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 			       public void onClick(DialogInterface dialog, int id) {
 				       if (mOnListener != null) {
-					       mOnListener.onOk();
+					       mOnListener.onGoOn();
 				       }
 				       dialog.dismiss();
 			       }
@@ -58,7 +58,7 @@ public final class TipForPinDialogFragment extends AppCompatDialogFragment {
 		       .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 			       public void onClick(DialogInterface dialog, int id) {
 				       if (mOnListener != null) {
-					       mOnListener.onCancel();
+					       mOnListener.onStay();
 				       }
 				       dialog.cancel();
 			       }
