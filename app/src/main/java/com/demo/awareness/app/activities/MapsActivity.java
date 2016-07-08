@@ -62,6 +62,7 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.RuntimePermissions;
 
 import static com.demo.awareness.R.id.map;
+import static com.demo.awareness.utils.Utils.*;
 import static com.demo.awareness.utils.Utils.fenceStateToBoolean;
 import static com.google.android.gms.analytics.internal.zzy.v;
 
@@ -264,7 +265,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 					                 //Error when getting photo of place, populate a default icon.
 					                 mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
-					                                                         .icon(Utils.getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
+					                                                         .icon(getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
 					                                                         .anchor(0f, 0f));
 					                 return;
 				                 }
@@ -281,7 +282,7 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 								                                    //Error when getting photo of place, populate a default icon.
 								                                    mGoogleMap.addMarker(new MarkerOptions().position(place.getLatLng())
-								                                                                            .icon(Utils.getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
+								                                                                            .icon(getBitmapDescriptor(App.Instance, R.drawable.ic_place_default_thumbnail))
 								                                                                            .anchor(0f, 0f));
 								                                    return;
 							                                    }
@@ -404,49 +405,49 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 			Log.d(TAG, "Fence activity" + fenceState.getFenceKey() + " - - cur: " + fenceState.getCurrentState() + ", previous: " + fenceState.getPreviousState());
 			switch (fenceState.getFenceKey()) {
 				case "UNKNOWN":
-					mBinding.unknownFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_unknown),
+					mBinding.unknownFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_unknown),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "ON_FOOT":
-					mBinding.onFootFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_foot),
+					mBinding.onFootFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_foot),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "RUNNING":
-					mBinding.onRunningFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_running),
+					mBinding.onRunningFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_running),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "WALKING":
-					mBinding.onWalkingFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_walking),
+					mBinding.onWalkingFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_walking),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "STILL":
-					mBinding.onStillFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_still),
+					mBinding.onStillFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_still),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "ON_BICYCLE":
-					mBinding.onBicycleFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_bicycle),
+					mBinding.onBicycleFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_on_bicycle),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "IN_VEHICLE":
-					mBinding.inVehicleFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_in_vehicle),
+					mBinding.inVehicleFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_in_vehicle),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));
 					break;
 				case "TILTING":
-					mBinding.tiltingFab.setImageDrawable(Utils.setTint(ContextCompat.getDrawable(context, R.drawable.ic_tilting),
+					mBinding.tiltingFab.setImageDrawable(setTint(ContextCompat.getDrawable(context, R.drawable.ic_tilting),
 					              fenceStateToBoolean(fenceState) ?
 					              ResourcesCompat.getColor(getResources(), R.color.colorLimeDark, null) :
 					              ResourcesCompat.getColor(getResources(), R.color.colorGrey, null)));

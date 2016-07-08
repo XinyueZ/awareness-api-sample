@@ -4,11 +4,11 @@ Sample for using [Awareness API](https://developers.google.com/awareness/)
 # Functions
 
 1. My current location
-2. Current weather
+2. Get current weather
 3. Places around my current location
 4. Detect plugged-In status of headset
 5. Detect current activity(running, walking, biking, driving, etc)
-6. Use time-based fences
+6. Tap a "location" on map and use any mock app to mock a Geofencing.
 
 # License
 
