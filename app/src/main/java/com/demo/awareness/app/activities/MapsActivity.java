@@ -119,23 +119,27 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mBinding = DataBindingUtil.setContentView(this, LAYOUT);
-		obtainMap();
+
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		registerHeadsetFence();
-		registerActivityFence();
+		if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+			initAll();
+		} else {
+			preInitAll();
+		}
 	}
 
 	@Override
 	protected void onPause() {
-		unregisterHeadsetFence();
-		unregisterActivityFence();
+		if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+			unregisterHeadsetFence();
+			unregisterActivityFence();
+		}
 		super.onPause();
 	}
-
 
 	@Override
 	public void onMapReady(GoogleMap googleMap) {
@@ -155,6 +159,9 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 		mGoogleApiClient = new GoogleApiClient.Builder(App.Instance, new GoogleApiClient.ConnectionCallbacks() {
 			@Override
 			public void onConnected(Bundle bundle) {
+
+				// Obtain the SupportMapFragment and get notified when the map is ready to be used.
+				initAll();
 				Snackbar.make(mBinding.mapContainerFl, R.string.ready_play_service, Snackbar.LENGTH_SHORT)
 				        .show();
 			}
@@ -189,6 +196,13 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 		mGoogleApiClient.connect();
 	}
 
+	private void initAll() {
+		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(map);
+		mapFragment.getMapAsync(MapsActivity.this);
+		registerHeadsetFence();
+		registerActivityFence();
+	}
+
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -210,17 +224,13 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 	}
 
 
-	private void obtainMap() {
-		MapsActivityPermissionsDispatcher.doObtainMapWithCheck(this);
+	private void preInitAll() {
+		MapsActivityPermissionsDispatcher.doPreInitAllWithCheck(this);
 	}
 
 	@NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-	void doObtainMap() {
+	void doPreInitAll() {
 		connectToGoolgePlayServices();
-
-		// Obtain the SupportMapFragment and get notified when the map is ready to be used.
-		SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(map);
-		mapFragment.getMapAsync(this);
 	}
 
 
@@ -592,12 +602,12 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 		                  .setResultCallback(new ResultCallbacks<Status>() {
 			                  @Override
 			                  public void onSuccess(@NonNull Status status) {
-				                  Log.i(TAG, "Fence " + MapsActivity.ACTION_FENCE_ACTIVITY + " successfully removed.");
+				                  Log.i(TAG, "Fence " + MapsActivity.ACTION_GEOFENCE + " successfully removed.");
 			                  }
 
 			                  @Override
 			                  public void onFailure(@NonNull Status status) {
-				                  Log.i(TAG, "Fence " + MapsActivity.ACTION_FENCE_ACTIVITY + " could NOT be removed.");
+				                  Log.i(TAG, "Fence " + MapsActivity.ACTION_GEOFENCE + " could NOT be removed.");
 			                  }
 		                  });
 	}
@@ -672,12 +682,14 @@ public final class MapsActivity extends FragmentActivity implements OnMapReadyCa
 
 	@Override
 	public void onGoOn() {
+		unregisterLocationFence();
+
 		ActivityCompat.finishAfterTransition(this);
 	}
 
 	@Override
 	public void onStay() {
-		unregisterLocationFence();
+
 	}
 
 	@Override
